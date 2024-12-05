@@ -5,16 +5,16 @@ import { FaCartPlus } from "react-icons/fa";
 import logo from '../Img/carlogo4.png';
 import { toast } from 'react-toastify';
 
-const Dropdown = ({ label, items, isMobile, onItemClick }) => {
+function Dropdown({ label, items, isMobile, onItemClick }) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
   useEffect(() => {
-    const handleClickOutside = (event) => {
+    function handleClickOutside(event) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsOpen(false);
       }
-    };
+    }
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
@@ -22,31 +22,32 @@ const Dropdown = ({ label, items, isMobile, onItemClick }) => {
     };
   }, []);
 
-  const handleMouseEnter = () => {
+  function handleMouseEnter() {
     if (!isMobile) {
       setIsOpen(true);
     }
-  };
+  }
 
-  const handleMouseLeave = () => {
+  function handleMouseLeave() {
     if (!isMobile) {
       setIsOpen(false);
     }
-  };
+  }
 
-  const toggleDropdown = () => {
+  function toggleDropdown() {
     if (isMobile) {
       setIsOpen(!isOpen);
     }
-  };
+  }
 
-  const handleItemClick = (item) => {
+  function handleItemClick(item) {
     if (onItemClick) onItemClick();
     if (item.onClick) item.onClick();
     setIsOpen(false);
-  };
+  }
 
   return (
+   
     <div 
       className={`relative dropdown-container ${isMobile ? 'w-full' : ''}`}
       ref={dropdownRef}
@@ -106,9 +107,9 @@ const Dropdown = ({ label, items, isMobile, onItemClick }) => {
       )}
     </div>
   );
-};
+}
 
-const Navbar = () => {
+function Navbar() {
   const [location, setLocation] = useState('');
   const [isMenuOpen, setMenuOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -119,10 +120,9 @@ const Navbar = () => {
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [cartCount, setCartCount] = useState(0);
-  
 
   useEffect(() => {
-    const fetchUserDetails = async () => {
+    async function fetchUserDetails() {
       setIsLoading(true);
       try {
         const response = await fetch('http://3.7.253.196:3000/api/users/user-detail', {
@@ -145,20 +145,19 @@ const Navbar = () => {
         } else {
           setError(data.message || 'An error occurred');
         }
-        
       } catch (err) {
         setError('An error occurred while fetching user details');
         console.error(err);
       } finally {
         setIsLoading(false);
       }
-    };
+    }
 
     fetchUserDetails();
   }, []);
 
   useEffect(() => {
-    const fetchCartData = async () => {
+    async function fetchCartData() {
       try {
         const response = await fetch('http://3.7.253.196:3000/api/cart', {
           method: 'GET',
@@ -173,25 +172,24 @@ const Navbar = () => {
         const data = await response.json();
         const itemCount = data.items.length;
         setCartCount(itemCount);
-        
       } catch (err) {
         setError(err.message || 'Failed to fetch cart data');
       }
-    };
+    }
 
     fetchCartData();
   }, []);
 
   useEffect(() => {
-    const handleResize = () => {
+    function handleResize() {
       setIsMobile(window.innerWidth < 1024);
-    };
+    }
     handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const handleLogout = async () => {
+  async function handleLogout() {
     setIsLoggingOut(true);
     try {
       const response = await fetch('http://3.7.253.196:3000/api/users/userLogout', {
@@ -212,9 +210,9 @@ const Navbar = () => {
     } finally {
       setIsLoggingOut(false);
     }
-  };
+  }
 
-  const handleLocationClick = () => {
+  function handleLocationClick() {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -232,11 +230,11 @@ const Navbar = () => {
     if (isMobile) {
       handleMobileLinkClick();
     }
-  };
+  }
 
-  const handleMobileLinkClick = () => {
+  function handleMobileLinkClick() {
     setMenuOpen(false);
-  };
+  }
 
   const servicesItems = [
     { type: 'link', label: 'Financing', href: '/financing', icon: FileText },
@@ -311,39 +309,39 @@ const Navbar = () => {
 
             <div className="hidden lg:flex items-center space-x-4">
               <Link to="/cart" className="p-2 rounded-full text-black-800 hover:text-orange-600 transition-colors duration-200">
-              <div className='text-2xl relative'>
-                <span> <FaCartPlus/></span>
-                <div className='bg-orange-600 text-white w-5 h-5 rounded-full p-1 flex items-center justify-center absolute -top-2 -right-3'>
-                <p className="text-sm">{cartCount}</p>
+                <div className='text-2xl relative'>
+                  <span> <FaCartPlus/></span>
+                  <div className='bg-orange-600 text-white w-5 h-5 rounded-full p-1 flex items-center justify-center absolute -top-2 -right-3'>
+                    <p className="text-sm">{cartCount}</p>
+                  </div>
                 </div>
-              </div>
               </Link>
               <Dropdown
-  label={
-    <div className="flex items-center">
-      <div className=" rounded-full p-1 mr-2">
-        {user?.profile ? (
-          <img
-            src={user.profile}
-            alt={user.name || "Profile Picture"}
-            className="h-9 w-9 rounded-full border-solid border-2 border-orange-500"
-          />
-        ) : (
-          <User className="h-5 w-5 text-white" />
-        )}
-      </div>
-      {user ? (
-        <span className="text-sm font-medium">
-          Hello, <span className="ml-1">{user.name}</span>
-        </span>
-      ) : (
-        <span className="text-sm font-medium">Account</span>
-      )}
-    </div>
-  }
-  items={accountItems}
-  isMobile={false}
-/>
+                label={
+                  <div className="flex items-center">
+                    <div className=" rounded-full p-1 mr-2">
+                      {user?.profile ? (
+                        <img
+                          src={user.profile}
+                          alt={user.name || "Profile Picture"}
+                          className="h-9 w-9 rounded-full border-solid border-2 border-orange-500"
+                        />
+                      ) : (
+                        <User className="h-5 w-5 text-white" />
+                      )}
+                    </div>
+                    {user ? (
+                      <span className="text-sm font-medium">
+                        Hello, <span className="ml-1">{user.name}</span>
+                      </span>
+                    ) : (
+                      <span className="text-sm font-medium">Account</span>
+                    )}
+                  </div>
+                }
+                items={accountItems}
+                isMobile={false}
+              />
 
               <button
                 onClick={handleLocationClick}
@@ -356,13 +354,12 @@ const Navbar = () => {
           </div>
         </div>
 
-        <div 
+        <div
           ref={mobileMenuRef}
           className={`lg:hidden fixed top-20 left-0 right-0 bottom-0 bg-orange-50 overflow-y-auto transition-transform duration-300 ease-in-out ${
             isMenuOpen ? 'transform translate-x-0' : 'transform translate-x-full'
           }`}
-          aria-label="Mobile menu
-"
+          aria-label="Mobile menu"
           aria-hidden={!isMenuOpen}
         >
           <div className="flex flex-col space-y-2 px-4 pb-4">
@@ -411,10 +408,12 @@ const Navbar = () => {
             </Link>
           </div>
         </div>
+     
+    
       </nav>
     </div>
   );
-};
+}
 
 export default Navbar;
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-const ProfileSetting = () => {
+function ProfileSetting() {
   const [user, setUser] = useState(null);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
@@ -10,7 +10,7 @@ const ProfileSetting = () => {
   const [profilePicture, setProfilePicture] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
 
-  const fetchUserDetails = async () => {
+  async function fetchUserDetails() {
     setIsLoading(true);
     try {
       const response = await fetch("http://3.7.253.196:3000/api/users/user-detail", {
@@ -42,28 +42,28 @@ const ProfileSetting = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }
 
   useEffect(() => {
     fetchUserDetails();
   }, []);
 
-  const handleEdit = () => {
+  function handleEdit() {
     setIsEditing(true);
-  };
+  }
 
-  const handleCancel = () => {
+  function handleCancel() {
     setIsEditing(false);
     setEditedUser(user);
     setProfilePicture(user.profile || null);
     setPreviewImage(user.profile || null);
-  };
+  }
 
-  const handleChange = (e) => {
+  function handleChange(e) {
     setEditedUser({ ...editedUser, [e.target.name]: e.target.value });
-  };
+  }
 
-  const handleProfilePictureChange = (e) => {
+  function handleProfilePictureChange(e) {
     const file = e.target.files[0];
     if (file) {
       setProfilePicture(file);
@@ -73,9 +73,9 @@ const ProfileSetting = () => {
       };
       reader.readAsDataURL(file);
     }
-  };
+  }
 
-  const handleSave = async () => {
+  async function handleSave() {
     setIsLoading(true);
     setSuccessMessage(null);
     setError(null);
@@ -113,7 +113,7 @@ const ProfileSetting = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }
 
   if (isLoading) {
     return (
@@ -223,6 +223,7 @@ const ProfileSetting = () => {
       </div>
     </div>
   );
-};
+}
 
 export default ProfileSetting;
+

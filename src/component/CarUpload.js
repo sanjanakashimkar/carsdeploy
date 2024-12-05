@@ -6,9 +6,8 @@ import { FaCar, FaGasPump, FaRoad, FaPalette, FaIdCard, FaMoneyBillWave, FaImage
 
 const brands = ['Tata', 'Maruti Suzuki', 'Kia', 'Toyota', 'Honda', 'Ford', 'Hyundai', 'Mahindra', 'Nissan', 'Volkswagen', 'BMW', 'Audi', 'Other'];
 const fuelTypes = ['Petrol', 'Diesel', 'Electric', 'Hybrid', 'CNG', 'LPG'];
-// const bodyTypes = ['Hatchback', 'Sedan', 'SUV', 'MUV', 'Coupe', 'Convertible', 'Wagon', 'Van', 'Jeep'];
 
-const CarUpload = () => {
+function CarUpload() {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     carName: '',
@@ -16,7 +15,6 @@ const CarUpload = () => {
     year: new Date().getFullYear(),
     kilometer: 0,
     fuelType: '',
-   
     color: 'red',
     vehicleNumber: '',
     owner: '',
@@ -30,13 +28,13 @@ const CarUpload = () => {
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
 
-  const handleInputChange = (e) => {
+  function handleInputChange(e) {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     setErrors((prev) => ({ ...prev, [name]: '' }));
-  };
+  }
 
-  const handleImageChange = (e) => {
+  function handleImageChange(e) {
     const files = Array.from(e.target.files);
     setImages((prevImages) => [
       ...prevImages,
@@ -45,20 +43,19 @@ const CarUpload = () => {
         preview: URL.createObjectURL(file),
       })),
     ]);
-  };
+  }
 
-  const removeImage = (index) => {
+  function removeImage(index) {
     setImages((prev) => prev.filter((_, i) => i !== index));
-  };
+  }
 
-  const validateForm = () => {
+  function validateForm() {
     const newErrors = {};
     if (!formData.carName.trim()) newErrors.carName = 'Car name is required';
     if (!formData.brand) newErrors.brand = 'Brand is required';
     if (formData.year < 1900 || formData.year > new Date().getFullYear()) newErrors.year = 'Invalid year';
     if (formData.kilometer < 0) newErrors.kilometer = 'Kilometer must be positive';
     if (!formData.fuelType) newErrors.fuelType = 'Fuel type is required';
-    // if (!formData.bodyType) newErrors.bodyType = 'Body type is required';
     if (!formData.vehicleNumber.trim()) newErrors.vehicleNumber = 'Vehicle number is required';
     if (!formData.owner.trim()) newErrors.owner = 'Owner name is required';
     if (formData.price <= 0) newErrors.price = 'Price must be greater than 0';
@@ -66,9 +63,9 @@ const CarUpload = () => {
     if (images.length === 0) newErrors.images = 'At least one image is required';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
+  }
 
-  const handleSubmit = async (e) => {
+  async function handleSubmit(e) {
     e.preventDefault();
     if (!validateForm()) return;
   
@@ -111,17 +108,17 @@ const CarUpload = () => {
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }
 
-  const nextStep = () => {
+  function nextStep() {
     if (step < 6) setStep((prevStep) => prevStep + 1);
-  };
+  }
 
-  const prevStep = () => {
+  function prevStep() {
     if (step > 1) setStep(step - 1);
-  };
+  }
 
-  const renderStepIndicator = () => {
+  function renderStepIndicator() {
     const steps = [
       { icon: FaCar, label: 'Basic Info' },
       { icon: FaGasPump, label: 'Specifications' },
@@ -141,9 +138,9 @@ const CarUpload = () => {
         ))}
       </div>
     );
-  };
+  }
 
-  const renderForm = () => {
+  function renderForm() {
     switch (step) {
       case 1:
         return (
@@ -212,17 +209,6 @@ const CarUpload = () => {
               ))}
             </select>
             {errors.fuelType && <p className="error">{errors.fuelType}</p>}
-
-            {/* <label htmlFor="bodyType">Body Type</label>
-            <select id="bodyType" name="bodyType" value={formData.bodyType} onChange={handleInputChange}>
-              <option value="">Select body type</option>
-              {bodyTypes.map((type) => (
-                <option key={type} value={type.toLowerCase()}>
-                  {type}
-                </option>
-              ))}
-            </select>
-            {errors.bodyType && <p className="error">{errors.bodyType}</p>} */}
           </div>
         );
       case 3:
@@ -352,10 +338,6 @@ const CarUpload = () => {
                   <p className="label">Fuel Type:</p>
                   <p>{formData.fuelType}</p>
                 </div>
-                {/* <div>
-                  <p className="label">Body Type:</p>
-                  <p>{formData.bodyType}</p>
-                </div> */}
                 <div>
                   <p className="label">Color:</p>
                   <p>{formData.color}</p>
@@ -391,9 +373,9 @@ const CarUpload = () => {
       default:
         return null;
     }
-  };
+  }
 
-  const SuccessModal = ({ isOpen, onClose }) => {
+  function SuccessModal({ isOpen, onClose }) {
     if (!isOpen) return null;
 
     return (
@@ -409,7 +391,6 @@ const CarUpload = () => {
                 year: new Date().getFullYear(),
                 kilometer: 0,
                 fuelType: '',
-                bodyType: '',
                 color: '#000000',
                 vehicleNumber: '',
                 owner: '',
@@ -430,7 +411,7 @@ const CarUpload = () => {
         </div>
       </div>
     );
-  };
+  }
 
   return (
     <div className="container">
@@ -776,7 +757,7 @@ const CarUpload = () => {
       `}</style>
     </div>
   );
-};
+}
 
 export default CarUpload;
 

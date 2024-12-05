@@ -7,7 +7,7 @@ import {
 } from 'react-icons/fa';
 import { useNavigate, useParams } from "react-router-dom";
 
-const TestDetails = () => {
+function TestDetails() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -17,13 +17,11 @@ const TestDetails = () => {
   const [error, setError] = useState(null);
   const [carData, setCarData] = useState({});
   const [status, setStatus] = useState(null);
-  const navigate=useNavigate()
-
-
+  const navigate = useNavigate();
 
   // Fetch test drive data
   useEffect(() => {
-    const fetchData = async () => {
+    async function fetchData() {
       try {
         const token = localStorage.getItem("token");
         if (!token) {
@@ -53,14 +51,14 @@ const TestDetails = () => {
       } finally {
         setLoading(false);
       }
-    };
+    }
 
     if (id) fetchData();
   }, [id]);
 
   // Fetch car data based on carId from test drive data
   useEffect(() => {
-    const fetchCarData = async (carId) => {
+    async function fetchCarData(carId) {
       if (!carId || (typeof carId === "object" && !carId.$oid)) {
         console.error("Invalid carId:", carId);
         setError("Invalid car ID");
@@ -69,7 +67,7 @@ const TestDetails = () => {
       }
 
       const carIdString = typeof carId === "object" ? carId.$oid : carId;
-      const url = `http://3.7.253.196    :3000/api/cars/cars/${carIdString}`;
+      const url = `http://3.7.253.196:3000/api/cars/cars/${carIdString}`;
       console.log("Fetching car data from:", url);
 
       try {
@@ -98,7 +96,7 @@ const TestDetails = () => {
         console.error("Error fetching car data:", err.message);
         setError(err.message);
       }
-    };
+    }
 
     if (data?.carId) {
       fetchCarData(data.carId);
@@ -131,15 +129,15 @@ const TestDetails = () => {
     },
   };
 
-  const formatPrice = (price) => {
+  function formatPrice(price) {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
       currency: 'INR',
       maximumFractionDigits: 0
     }).format(price);
-  };
+  }
 
-  const formatDate = (dateString) => {
+  function formatDate(dateString) {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
       weekday: 'long',
@@ -147,28 +145,28 @@ const TestDetails = () => {
       month: 'long',
       day: 'numeric'
     });
-  };
+  }
 
-  const formatTime = (time) => {
+  function formatTime(time) {
     const [hours, minutes] = time.split(':');
     const period = Number(hours) >= 12 ? 'PM' : 'AM';
     const formattedHours = Number(hours) % 12 || 12;
     return `${formattedHours}:${minutes} ${period}`;
-  };
+  }
 
-  const nextImage = () => {
+  function nextImage() {
     setCurrentImageIndex((prevIndex) => 
       (prevIndex + 1) % bookingData.car.images.length
     );
-  };
+  }
 
-  const prevImage = () => {
+  function prevImage() {
     setCurrentImageIndex((prevIndex) => 
       (prevIndex - 1 + bookingData.car.images.length) % bookingData.car.images.length
     );
-  };
+  }
 
-  const handleCancel = async () => {
+  async function handleCancel() {
     try {
       const response = await fetch(`http://3.7.253.196:3000/api/testDrive/${id}/cancel`, {
         method: 'PATCH',
@@ -182,18 +180,17 @@ const TestDetails = () => {
         console.error('Error Details:', errorDetails);
         throw new Error(`Error: ${response.status} - ${errorDetails.message}`);
       }
-      navigate('/testdriveStatus')
+      navigate('/testdriveStatus');
     } catch (err) {
       console.error('Error handling cancel:', err.message);
     }
-  };
+  }
 
-
-  const handleDelete = () => {
+  function handleDelete() {
     setIsDeleteModalOpen(true);
-  };
+  }
 
-  const confirmDelete =async () => {
+  async function confirmDelete() {
     try {
       const response = await fetch(`http://3.7.253.196:3000/api/testDrive/delete/${id}`, {
         method: 'DELETE',
@@ -207,35 +204,47 @@ const TestDetails = () => {
         console.error('Error Details:', errorDetails);
         throw new Error(`Error: ${response.status} - ${errorDetails.message}`);
       }
-      navigate('/testdriveStatus')
+      navigate('/testdriveStatus');
     } catch (err) {
-      console.error('Error handling cancel:', err.message);
+      console.error('Error handling delete:', err.message);
     }
     setIsDeleteModalOpen(false);
-   
-  };
+  }
 
-  const handleEdit = () => {
+  function handleEdit() {
     setIsEditing(true);
-  };
+  }
 
-  const handleUpdate = () => {
-    // Here you would typically send the updated data to your backend
-    console.log("Updated data:", bookingData);
-    setIsEditing(false);
-    alert("Booking updated successfully!");
-  };
+  async function handleUpdate() {
+    try {
+      const response = await fetch(`http://3.7.253.196:3000/api/testDrive/update/${id}`, {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        const errorDetails = await response.json();
+        console.error('Error Details:', errorDetails);
+        throw new Error(`Error: ${response.status} - ${errorDetails.message}`);
+      }
+      setIsEditing(false);
+      alert("Booking updated successfully!");
+    } catch (err) {
+      console.error('Error handling update:', err.message);
+      alert("Failed to update booking. Please try again.");
+    }
+  }
 
-  const handleInputChange = (e) => {
+  function handleInputChange(e) {
     const { name, value } = e.target;
     setData(prevData => ({
       ...prevData,
-      customer: {
-        ...prevData.customer,
-        [name]: value
-      }
+      [name]: value
     }));
-  };
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-blue-50 p-4 md:p-8">
@@ -441,7 +450,7 @@ const TestDetails = () => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={handleCancel}
-            className="px-6 py-2 bg-gray-500 tcolors duration-300 flex items-center"
+            className="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors duration-300 flex items-center"
           >
             <FaTimes className="mr-2" />
             Cancel Booking
@@ -496,7 +505,7 @@ const TestDetails = () => {
       </AnimatePresence>
     </div>
   );
-};
+}
 
 export default TestDetails;
 

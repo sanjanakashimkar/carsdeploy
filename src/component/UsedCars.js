@@ -4,11 +4,9 @@ import { FaRegStar, FaStar, FaChevronDown, FaChevronRight, FaCar, FaUser, FaGasP
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-// ... (keep the brandsWithModels array and fetchCarsData function as they are)
 const brandsWithModels = [
   {
     name: "maruti suzuki",
-    
     models: [
       { id: "swift", name: "Swift" },
       { id: "tiago", name: "Tiago" },
@@ -19,7 +17,6 @@ const brandsWithModels = [
   },
   {
     name: "hyundai",
-
     models: [
       { id: "i20", name: "i20" },
       { id: "venue", name: "Venue" },
@@ -33,42 +30,48 @@ const brandsWithModels = [
       { id: "harrier", name: "Harrier" },
       { id: "safari", name: "Safari" },
     ]
-  }, {
+  },
+  {
     name: "Honda",
     models: [
       { id: "nexon", name: "nexon" },
       { id: "harrier", name: "Harrier" },
       { id: "safari", name: "Safari" },
     ]
-  }, {
+  },
+  {
     name: "Renault",
     models: [
       { id: "nexon", name: "nexon" },
       { id: "harrier", name: "Harrier" },
       { id: "safari", name: "Safari" },
     ]
-  }, {
+  },
+  {
     name: "Volkswagen",
     models: [
       { id: "nexon", name: "nexon" },
       { id: "harrier", name: "Harrier" },
       { id: "safari", name: "Safari" },
     ]
-  }, {
+  },
+  {
     name: "Mahindra",
     models: [
       { id: "nexon", name: "nexon" },
       { id: "harrier", name: "Harrier" },
       { id: "safari", name: "Safari" },
     ]
-  }, {
+  },
+  {
     name: "KIA",
     models: [
       { id: "nexon", name: "nexon" },
       { id: "harrier", name: "Harrier" },
       { id: "safari", name: "Safari" },
     ]
-  },{
+  },
+  {
     name: "audi",
     models: [
       { id: "nexon", name: "nexon" },
@@ -76,49 +79,55 @@ const brandsWithModels = [
       { id: "safari", name: "Safari" },
     ]
   },
-   {
+  {
     name: "Ford",
     models: [
       { id: "nexon", name: "nexon" },
       { id: "harrier", name: "Harrier" },
       { id: "safari", name: "Safari" },
     ]
-  }, {
+  },
+  {
     name: "MG",
     models: [
       { id: "nexon", name: "nexon" },
       { id: "harrier", name: "Harrier" },
       { id: "safari", name: "Safari" },
     ]
-  },{
+  },
+  {
     name: "Datsun",
     models: [
       { id: "nexon", name: "nexon" },
       { id: "harrier", name: "Harrier" },
       { id: "safari", name: "Safari" },
     ]
-  },{
+  },
+  {
     name: "Skoda",
     models: [
       { id: "nexon", name: "nexon" },
       { id: "harrier", name: "Harrier" },
       { id: "safari", name: "Safari" },
     ]
-  },{
+  },
+  {
     name: "Toyota",
     models: [
       { id: "nexon", name: "nexon" },
       { id: "harrier", name: "Harrier" },
       { id: "safari", name: "Safari" },
     ]
-  },{
+  },
+  {
     name: "Jeep",
     models: [
       { id: "nexon", name: "nexon" },
       { id: "harrier", name: "Harrier" },
       { id: "safari", name: "Safari" },
     ]
-  },{
+  },
+  {
     name: "Nissan",
     models: [
       { id: "nexon", name: "nexon" },
@@ -127,45 +136,47 @@ const brandsWithModels = [
     ]
   },
 ];
-const fetchCarsData = async (budget, selectedFilters) => {
-  try {
-    // Convert selected filters to query string
-    const filterQuery = selectedFilters.map(f => `${f.brand}:${f.model}`).join(',');
-    const response = await fetch(
-      `http://3.7.253.196:3000/api/cars/cars?budgetMin=${budget[0]}&budgetMax=${budget[1]}&filters=${filterQuery}`,
-      {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+
+function fetchCarsData(budget, selectedFilters) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const filterQuery = selectedFilters.map(f => `${f.brand}:${f.model}`).join(',');
+      const response = await fetch(
+        `http://3.7.253.196:3000/api/cars/cars?budgetMin=${budget[0]}&budgetMax=${budget[1]}&filters=${filterQuery}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
       }
-    );
 
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
+      const data = await response.json();
+
+      const filteredCars = data
+        .filter((car) => {
+          const priceInRange = car.price >= budget[0] && car.price <= budget[1];
+          
+          if (selectedFilters.length === 0) return priceInRange;
+          
+          return selectedFilters.some(filter => 
+            car.brand.toLowerCase() === filter.brand.toLowerCase() && 
+            (!filter.model || car.model.toLowerCase() === filter.model.toLowerCase())
+          );
+        })
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+      resolve(filteredCars);
+    } catch (error) {
+      console.error('Error fetching cars:', error);
+      reject(error);
     }
-
-    const data = await response.json();
-
-    const filteredCars = data
-      .filter((car) => {
-        const priceInRange = car.price >= budget[0] && car.price <= budget[1];
-        
-        if (selectedFilters.length === 0) return priceInRange;
-        
-        return selectedFilters.some(filter => 
-          car.brand.toLowerCase() === filter.brand.toLowerCase() && 
-          (!filter.model || car.model.toLowerCase() === filter.model.toLowerCase())
-        );
-      })
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-
-    return filteredCars;
-  } catch (error) {
-    console.error('Error fetching cars:', error);
-    return [];
-  }
-};
+  });
+}
 
 function UsedCars() {
   const [budget, setBudget] = useState([0, 2500000]);
@@ -177,7 +188,7 @@ function UsedCars() {
   const [expandedBrands, setExpandedBrands] = useState({});
 
   useEffect(() => {
-    const loadCars = async () => {
+    async function loadCars() {
       setLoading(true);
       try {
         const filteredCars = await fetchCarsData(budget, selectedFilters);
@@ -188,31 +199,30 @@ function UsedCars() {
       } finally {
         setLoading(false);
       }
-    };
+    }
   
     loadCars();
   }, [budget, selectedFilters]);
 
   useEffect(() => {
-    // Load cart items from localStorage on component mount
     const savedCartItems = JSON.parse(localStorage.getItem('cartItems') || '{}');
     setCartItems(savedCartItems);
   }, []);
 
-  const handleBudgetChange = (e) => {
+  function handleBudgetChange(e) {
     const newBudget = parseInt(e.target.value);
     setBudget([newBudget, 2500000]);
     if (window.innerWidth < 1024) setShowFilters(false);
-  };
+  }
 
-  const toggleBrand = (brandName) => {
+  function toggleBrand(brandName) {
     setExpandedBrands(prev => ({
       ...prev,
       [brandName]: !prev[brandName]
     }));
-  };
+  }
 
-  const toggleFilter = (brand, model = '') => {
+  function toggleFilter(brand, model = '') {
     setSelectedFilters(prev => {
       const filterExists = prev.some(
         f => f.brand === brand && f.model === model
@@ -226,13 +236,13 @@ function UsedCars() {
     });
 
     if (window.innerWidth < 1024) setShowFilters(false);
-  };
+  }
 
-  const isFilterSelected = (brand, model = '') => {
+  function isFilterSelected(brand, model = '') {
     return selectedFilters.some(f => f.brand === brand && f.model === model);
-  };
+  }
 
-  const handleAddToCart = async (carId) => {
+  async function handleAddToCart(carId) {
     try {
       const response = await fetch('http://3.7.253.196:3000/api/cart/add', {
         method: 'POST',
@@ -257,9 +267,9 @@ function UsedCars() {
       console.error('Error adding to cart:', error);
       toast.error('Failed to add to cart. Please try again.');
     }
-  };
+  }
 
-  const handleRemoveFromCart = async (carId) => {
+  async function handleRemoveFromCart(carId) {
     try {
       const response = await fetch(`http://3.7.253.196:3000/api/cart/remove/${carId}`, {
         method: 'DELETE',
@@ -283,7 +293,7 @@ function UsedCars() {
       console.error('Error removing from cart:', error);
       toast.error('Failed to remove from cart. Please try again.');
     }
-  };
+  }
 
   return (
     <div className="container mx-auto mt-10 px-4 mb-20">
@@ -414,7 +424,6 @@ function UsedCars() {
                   className="bg-white rounded-xl overflow-hidden transition-all duration-300 hover:shadow-xl border border-gray-200 shadow-md shadow-orange-400"
                   whileHover={{ y: -5 }}
                 >
-                  {/* Image Section */}
                   <div className="relative h-48">
                     <img
                       src={car?.images?.[0]?.url || "/placeholder.svg"}
@@ -432,51 +441,46 @@ function UsedCars() {
                     </motion.button>
                   </div>
       
-                  {/* Car Details */}
                   <div className="p-6 space-y-4">
-                    {/* Title */}
                     <h3 className="font-bold text-xl text-blue-800">
                       {car.year || "Year"} {car.brand || "Brand"} {car.carName || "Car Name"}
                     </h3>
       
-                    {/* Tags */}
                     <div className="flex flex-wrap gap-2">
-          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-            <FaCar className="h-3 w-3 mr-1" />
-            {car.kilometer} km
-          </span>
-          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-            <FaGasPump className="h-3 w-3 mr-1" />
-            {car.fuelType}
-          </span>
-          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-            <FaUser className="h-3 w-3 mr-1" />
-            {car.owner}
-          </span>
-        </div>
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        <FaCar className="h-3 w-3 mr-1" />
+                        {car.kilometer} km
+                      </span>
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        <FaGasPump className="h-3 w-3 mr-1" />
+                        {car.fuelType}
+                      </span>
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                        <FaUser className="h-3 w-3 mr-1" />
+                        {car.owner}
+                      </span>
+                    </div>
       
-                    {/* Price */}
                     <div className="flex items-center justify-between">
                       <div className="text-2xl font-bold text-orange-500">
                         ₹{car.price ? (car.price / 100000).toFixed(2) : "N/A"}L
                       </div>
                     </div>
       
-                    {/* Test Drive & View Details */}
                     <div className="space-y-3">
-          <div className="flex items-center text-sm text-gray-600">
-            <FaMapMarkerAlt className="h-4 w-4 text-gray-400 mr-1" />
-            Free Test Drive Available
-          </div>
-          <motion.a
-            href={`/carsdata/${car._id}`}
-            className="block w-full bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors text-center font-medium group"
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-          >
-            View Details
-            <FaChevronRight className="inline-block ml-2 group-hover:translate-x-1 transition-transform" />
-          </motion.a>
+                      <div className="flex items-center text-sm text-gray-600">
+                        <FaMapMarkerAlt className="h-4 w-4 text-gray-400 mr-1" />
+                        Free Test Drive Available
+                      </div>
+                      <motion.a
+                        href={`/carsdata/${car._id}`}
+                        className="block w-full bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors text-center font-medium group"
+                        whileHover={{ scale: 1.03 }}
+                        whileTap={{ scale: 0.97 }}
+                      >
+                        View Details
+                        <FaChevronRight className="inline-block ml-2 group-hover:translate-x-1 transition-transform" />
+                      </motion.a>
                     </div>
                   </div>
                 </motion.div>

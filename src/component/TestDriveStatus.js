@@ -5,95 +5,98 @@ import { motion, AnimatePresence, LayoutGroup } from 'framer-motion'
 import { Calendar, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
-export default function TestDriveStatus() {
+function TestDriveStatus() {
   const [testDriveData, setTestDriveData] = useState([])
   const [error, setError] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
   const [carData, setCarData] = useState({})
 
-  const fetchCarsData = async () => {
-    try {
-      setIsLoading(true)
-      const response = await fetch('http://3.7.253.196:3000/api/testdrive/get',{
-        headers : {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          "content-type" : 'application/json'
+  function fetchCarsData() {
+    setIsLoading(true)
+    return fetch('http://3.7.253.196:3000/api/testdrive/get', {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        "content-type": 'application/json'
       },
+    })
+      .then(response => {
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
+        return response.json()
       })
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
-      const data = await response.json()
-      setTestDriveData(data)
-      setError(null)
-      return data
-    } catch (error) {
-      console.error('Error fetching test drive data:', error)
-      setError('Failed to fetch test drive data. Please try again later.')
-      return []
-    } finally {
-      setIsLoading(false)
-    }
+      .then(data => {
+        setTestDriveData(data)
+        setError(null)
+        return data
+      })
+      .catch(error => {
+        console.error('Error fetching test drive data:', error)
+        setError('Failed to fetch test drive data. Please try again later.')
+        return []
+      })
+      .finally(() => {
+        setIsLoading(false)
+      })
   }
 
-  const fetchCarById = async (carId) => {
+  function fetchCarById(carId) {
     if (!carId || (typeof carId === 'object' && !carId.$oid)) {
       console.error("Invalid carId:", carId);
-      return null;
+      return Promise.resolve(null);
     }
   
     const carIdString = typeof carId === 'object' ? carId.$oid : carId;
     const url = `http://65.0.61.22:3000/api/cars/cars/${carIdString}`;
     console.log('Fetching car data from:', url);
   
-    try {
-      const response = await fetch(url, {
-        method: 'GET', // Specify the HTTP method
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json',
-        },
-      });
-  
-      if (!response.ok) {
-        if (response.status === 404) {
-          console.warn(`Car with id ${carIdString} not found`);
-          return null;
+    return fetch(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        'Content-Type': 'application/json',
+      },
+    })
+      .then(response => {
+        if (!response.ok) {
+          if (response.status === 404) {
+            console.warn(`Car with id ${carIdString} not found`);
+            return null;
+          }
+          throw new Error(`Failed to fetch car data, status: ${response.status}`);
         }
-        throw new Error(`Failed to fetch car data, status: ${response.status}`);
-      }
-  
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error('Error fetching car data:', error.message);
-      return null;
-    }
-  };
+        return response.json();
+      })
+      .catch(error => {
+        console.error('Error fetching car data:', error.message);
+        return null;
+      });
+  }
   
   useEffect(() => {
-    const fetchAllData = async () => {
-      const testDrives = await fetchCarsData();
-      const carDataPromises = testDrives.map(drive => 
-        drive.carId ? fetchCarById(drive.carId) : Promise.resolve(null)
-      );
-      const carDataResults = await Promise.all(carDataPromises);
-      
-      const carDataMap = {};
-      carDataResults.forEach((car, index) => {
-        if (car && testDrives[index].carId) {
-          const carIdString = typeof testDrives[index].carId === 'object' 
-            ? testDrives[index].carId.$oid 
-            : testDrives[index].carId;
-          carDataMap[carIdString] = car;
-        }
-      });
-      
-      setCarData(carDataMap);
-    };
+    function fetchAllData() {
+      fetchCarsData()
+        .then(testDrives => {
+          const carDataPromises = testDrives.map(drive => 
+            drive.carId ? fetchCarById(drive.carId) : Promise.resolve(null)
+          );
+          return Promise.all(carDataPromises).then(carDataResults => {
+            const carDataMap = {};
+            carDataResults.forEach((car, index) => {
+              if (car && testDrives[index].carId) {
+                const carIdString = typeof testDrives[index].carId === 'object' 
+                  ? testDrives[index].carId.$oid 
+                  : testDrives[index].carId;
+                carDataMap[carIdString] = car;
+              }
+            });
+            setCarData(carDataMap);
+          });
+        });
+    }
 
     fetchAllData();
   }, []);
 
-  const getStatusIcon = (status) => {
+  function getStatusIcon(status) {
     switch (status) {
       case 'scheduled':
         return <Calendar className="w-4 h-4" />
@@ -106,7 +109,7 @@ export default function TestDriveStatus() {
     }
   }
 
-  const getStatusStyle = (status) => {
+  function getStatusStyle(status) {
     switch (status) {
       case 'scheduled':
         return {
@@ -139,7 +142,7 @@ export default function TestDriveStatus() {
     }
   }
 
-  const formatDate = (dateString) => {
+  function formatDate(dateString) {
     const date = new Date(dateString)
     return date.toLocaleDateString('en-US', {
       month: 'short',
@@ -284,4 +287,6 @@ export default function TestDriveStatus() {
     </LayoutGroup>
   )
 }
+
+export default TestDriveStatus
 

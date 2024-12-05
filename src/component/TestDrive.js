@@ -42,16 +42,16 @@ function TestDrive() {
   const y = useMotionValue(0);
   const opacity = useTransform(y, [-300, 0, 300], [0, 1, 0]);
 
-  const handleChange = (e) => {
+  function handleChange(e) {
     const { name, value } = e.target;
     setFormData((prevData) => ({ ...prevData, [name]: value }));
-  };
+  }
 
-  const handleDateChange = (date) => {
+  function handleDateChange(date) {
     setFormData((prevData) => ({ ...prevData, date }));
-  };
+  }
 
-  const fetchCarDetails = async () => {
+  async function fetchCarDetails() {
     try {
       const response = await fetch(`http://3.7.253.196:3000/api/cars/cars/${params?.id}`, {
         method: 'GET',
@@ -79,9 +79,9 @@ function TestDrive() {
     } finally {
       setLoading(false);
     }
-  };
+  }
 
-  const fetchCarFeatures = async () => {
+  async function fetchCarFeatures() {
     setLoadingFeatures(true);
     try {
       const response = await fetch(`http://3.7.253.196:3000/api/cars/cars/${params?.id}`, {
@@ -100,13 +100,9 @@ function TestDrive() {
 
       const features = [
         { icon: <CarIcon className="w-6 h-6" />, text: `Model: ${dataResponse?.carName ?? 'N/A'} ${dataResponse.brand}` },
-        // { icon: <CalendarIcon className="w-6 h-6" />, text: `Year: ${dataResponse?.year ?? 'N/A'}` },
         { icon: <FuelIcon className="w-6 h-6" />, text: `Fuel Type: ${dataResponse?.fuelType ?? 'N/A'}` },
         { icon: <MilestoneIcon className="w-6 h-6" />, text: `kilometer: ${dataResponse?.kilometer ?? 'N/A'} km` },
-        // { icon: <UsersIcon className="w-6 h-6" />, text: `Seats: ${dataResponse?.seats ?? 'N/A'}` },
-        // { icon: <PaletteIcon className="w-6 h-6" />, text: `Color: ${dataResponse?.color ?? 'N/A'}` },
         { icon: <DollarSignIcon className="w-6 h-6" />, text: `Price: ₹${dataResponse?.price?.toLocaleString() ?? 'N/A'}` },
-        // { icon: <MapPinIcon className="w-6 h-6" />, text: `Location: ${dataResponse?.location ?? 'N/A'}` },
       ];
 
       setCarFeatures(features);
@@ -116,20 +112,20 @@ function TestDrive() {
     } finally {
       setLoadingFeatures(false);
     }
-  };
+  }
 
   useEffect(() => {
     fetchCarDetails();
   }, [params?.id]);
 
-  const handleShowFeatures = () => {
+  function handleShowFeatures() {
     if (!showFeatures) {
       fetchCarFeatures();
     }
     setShowFeatures(!showFeatures);
-  };
+  }
 
-  const handleSubmit = async (e) => {
+  async function handleSubmit(e) {
     e.preventDefault();
     setIsLoading(true);
     try {
@@ -138,7 +134,7 @@ function TestDrive() {
         headers : {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
           "content-type" : 'application/json'
-      },
+        },
         body: JSON.stringify(formData),
       });
 
@@ -159,37 +155,34 @@ function TestDrive() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }
 
-  const nextImage = () => {
+  function nextImage() {
     setCurrentImageIndex((prevIndex) =>
       prevIndex === (data?.images?.length ?? 1) - 1 ? 0 : prevIndex + 1
     );
-  };
+  }
 
-  const prevImage = () => {
+  function prevImage() {
     setCurrentImageIndex((prevIndex) =>
       prevIndex === 0 ? (data?.images?.length ?? 1) - 1 : prevIndex - 1
     );
-  };
+  }
 
   useEffect(() => {
-    const handleScroll = () => {
+    function handleScroll() {
       setScrollY(window.scrollY);
-    };
+    }
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  // const parallaxY = useTransform(scrollY, [0, 500], [0, -150]);
-  // const parallaxRotate = useTransform(scrollY, [0, 500], [0, 10]);
 
   const springConfig = { stiffness: 100, damping: 30, restDelta: 0.001 };
   const x = useSpring(0, springConfig);
   const rotate = useSpring(0, springConfig);
 
   useEffect(() => {
-    const handleMouseMove = (event) => {
+    function handleMouseMove(event) {
       if (!containerRef.current) return;
       const rect = containerRef.current.getBoundingClientRect();
       const mouseX = event.clientX - rect.left;
@@ -203,7 +196,7 @@ function TestDrive() {
 
       x.set(deltaX * 20);
       rotate.set(deltaX * 10);
-    };
+    }
 
     const container = containerRef.current;
     if (container) {
@@ -262,7 +255,6 @@ function TestDrive() {
 
           <motion.div
             ref={containerRef}
-            // style={{ y: parallaxY, rotateX: parallaxRotate, x, rotate }}
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
@@ -501,30 +493,29 @@ function TestDrive() {
                         />
                       </motion.div>
                       <div className="flex justify-center">
-  <motion.button
-    type="submit"
-    className={`${
-      isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
-    } text-white font-bold py-3 px-8 rounded-full text-lg transition-all duration-300 ease-in-out shadow-lg`}
-    disabled={isLoading}
-    whileHover={!isLoading ? { scale: 1.05, boxShadow: "0 0 20px rgba(59, 130, 246, 0.5)" } : {}}
-    whileTap={!isLoading ? { scale: 0.95 } : {}}
-  >
-    {isLoading ? (
-      <motion.div
-        className="inline-flex items-center"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-      >
-        <Loader2Icon className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" />
-        Reserving...
-      </motion.div>
-    ) : (
-      "Reserve Your Experience"
-    )}
-  </motion.button>
-</div>
-
+                        <motion.button
+                          type="submit"
+                          className={`${
+                            isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
+                          } text-white font-bold py-3 px-8 rounded-full text-lg transition-all duration-300 ease-in-out shadow-lg`}
+                          disabled={isLoading}
+                          whileHover={!isLoading ? { scale: 1.05, boxShadow: "0 0 20px rgba(59, 130, 246, 0.5)" } : {}}
+                          whileTap={!isLoading ? { scale: 0.95 } : {}}
+                        >
+                          {isLoading ? (
+                            <motion.div
+                              className="inline-flex items-center"
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                            >
+                              <Loader2Icon className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" />
+                              Reserving...
+                            </motion.div>
+                          ) : (
+                            "Reserve Your Experience"
+                          )}
+                        </motion.button>
+                      </div>
                       {error && (
                         <motion.p
                           initial={{ opacity: 0 }}

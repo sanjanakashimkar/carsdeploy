@@ -1,55 +1,55 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaHeart, FaMapMarkerAlt, FaCar, FaGasPump, FaUser, FaChevronRight, FaSearch,FaShoppingCart } from "react-icons/fa";
+import { FaHeart, FaMapMarkerAlt, FaCar, FaGasPump, FaUser, FaChevronRight, FaSearch, FaShoppingCart } from "react-icons/fa";
 import { Link } from 'react-router-dom';
 
-const fetchCartData = async () => {
-  try {
-    const response = await fetch('http://3.7.253.196:3000/api/cart', {
-      method: 'GET',
-      credentials: 'include',
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        "content-type": 'application/json'
+function fetchCartData() {
+  return fetch('http://3.7.253.196:3000/api/cart', {
+    method: 'GET',
+    credentials: 'include',
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('token')}`,
+      'Content-Type': 'application/json',
+    },
+  })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Failed to fetch cart details');
       }
+      return response.json();
+    })
+    .then(data => data.items || [])
+    .catch(error => {
+      console.error('Error fetching cart details:', error);
+      return [];
     });
+}
 
-    if (!response.ok) {
-      throw new Error('Failed to fetch cart details');
-    }
-
-    const data = await response.json();
-    return data.items || [];
-  } catch (error) {
-    console.error('Error fetching cart details:', error);
-    return [];
-  }
-};
-
-const handleRemoveFromCart = async (carId, setCartItems) => {
-  try {
-    const response = await fetch(`http://3.7.253.196:3000/api/cart/remove/${carId}`, {
-      method: 'DELETE',
-      credentials: 'include',
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        "content-type": 'application/json'
-      },
+function handleRemoveFromCart(carId, setCartItems) {
+  return fetch(`http://3.7.253.196:3000/api/cart/remove/${carId}`, {
+    method: 'DELETE',
+    credentials: 'include',
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('token')}`,
+      'Content-Type': 'application/json',
+    },
+  })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Failed to remove item from cart');
+      }
+      return response.json();
+    })
+    .then(() => {
+      setCartItems(prevItems => prevItems.filter(item => item.car._id !== carId));
+    })
+    .catch(error => {
+      console.error('Error removing item from cart:', error);
     });
+}
 
-    if (!response.ok) {
-      throw new Error('Failed to remove item from cart');
-    }
-
-    const updatedCart = await response.json();
-    setCartItems((prevItems) => prevItems.filter((item) => item.car._id !== carId));
-    console.log('Removed from cart:', updatedCart);
-  } catch (error) {
-    console.error('Error removing item from cart:', error);
-  }
-};
-
-function CarItem({ item, onRemove }) {
+function CarItem(props) {
+  const { item, onRemove } = props;
 
   return (
     <motion.div
@@ -73,7 +73,7 @@ function CarItem({ item, onRemove }) {
           className="absolute top-3 right-3 p-2 bg-white rounded-full shadow-md hover:bg-red-50 group transition-all duration-300"
           aria-label="Remove from saved cars"
         >
-          <FaShoppingCart  className="h-5 w-5 text-orange-500 group-hover:scale-110 transition-transform" />
+          <FaShoppingCart className="h-5 w-5 text-orange-500 group-hover:scale-110 transition-transform" />
         </motion.button>
       </div>
       <div className="p-4 space-y-4">
@@ -94,14 +94,11 @@ function CarItem({ item, onRemove }) {
             {item.car.owner}
           </span>
         </div>
-        
         <div className="flex items-center justify-between">
           <div className="text-2xl font-bold text-orange-500">
             ₹{item.car.price ? (item.car.price / 100000).toFixed(2) : 'N/A'}L
           </div>
-          {/* <span className="text-xs text-gray-500">+ other charges</span> */}
         </div>
-
         <div className="space-y-3">
           <div className="flex items-center text-sm text-gray-600">
             <FaMapMarkerAlt className="h-4 w-4 text-gray-400 mr-1" />
@@ -202,7 +199,5 @@ function AddToCart() {
     </div>
   );
 }
-
-
 
 export default AddToCart;

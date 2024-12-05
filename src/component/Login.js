@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { EyeIcon, EyeOffIcon } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 
-export function Login() {
+function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
@@ -41,18 +39,17 @@ export function Login() {
       });
 
       const data = await response.json();
-      console.log(data); // Debugging: Ensure this shows the response with token
 
       if (data.success && data.data.token) {
         // Store the token in localStorage
         localStorage.setItem("token", data.data.token);
-        toast.success(data.message);
+        alert(data.message); // You can replace this with a toast notification
         navigate("/"); // Redirect to the homepage or protected route
       } else {
-        toast.error(data.message || "Login failed");
+        setError(data.message || "Login failed");
       }
     } catch (err) {
-      toast.error("Something went wrong. Please try again.");
+      setError("Something went wrong. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -121,9 +118,9 @@ export function Login() {
         </form>
         <p className="mt-4 text-center text-sm text-gray-600">
           Don't have an account?{' '}
-          <Link to="/signup" className="font-medium text-blue-600 hover:text-blue-500">
+          <a href="/signup" className="font-medium text-blue-600 hover:text-blue-500">
             Sign Up
-          </Link>
+          </a>
         </p>
       </div>
     </div>
@@ -131,3 +128,4 @@ export function Login() {
 }
 
 export default Login;
+
