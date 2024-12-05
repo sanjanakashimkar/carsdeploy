@@ -34,7 +34,7 @@ function CarsData() {
   const fetchCarDetails = async () => {
     try {
       const response = await fetch(
-        `http://3.7.253.196:3000/api/cars/cars/${params?.id}`,
+        `http://65.1.95.238:3000/api/cars/cars/${params?.id}`,
         {
           method: 'GET',
           headers: {
